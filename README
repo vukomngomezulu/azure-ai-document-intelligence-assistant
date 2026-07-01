@@ -1,0 +1,60 @@
+# Azure AI Document Intelligence Assistant
+
+## Overview
+
+Azure AI Document Intelligence Assistant is a cloud-based AI platform that enables users to upload PDF and Word documents and interact with them using natural language.
+
+The platform uses Retrieval-Augmented Generation (RAG) to retrieve relevant information from uploaded documents before generating accurate, context-aware responses using Azure OpenAI.
+
+---
+
+## Features
+
+- Upload PDF and Word documents
+- Extract text using Azure AI Document Intelligence
+- Store documents securely in Azure Blob Storage
+- Generate vector embeddings
+- Semantic search using Azure AI Search
+- Chat with documents using Azure OpenAI
+- Secure user authentication
+- Cloud-native Azure deployment
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- React
+- TypeScript
+
+### Backend
+
+- FastAPI
+- Python
+
+### AI Services
+
+- Azure AI Document Intelligence
+- Azure OpenAI
+- Azure AI Search
+
+### Cloud
+
+- Azure Blob Storage
+- Azure Container Apps
+
+---
+
+## Project Status
+
+Currently under development.
+
+Phase 1: Project Foundation ✅
+Phase 2 – Backend Skeleton
+Phase 3 – Document Upload
+Phase 4 – Document Intelligence
+Phase 5 – RAG Pipeline
+Phase 6 – Database
+Phase 7 – Authentication
+Phase 8 – Frontend
