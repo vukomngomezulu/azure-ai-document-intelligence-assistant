@@ -50,8 +50,8 @@ The platform uses Retrieval-Augmented Generation (RAG) to retrieve relevant info
 
 Currently under development.
 
-Phase 1: Project Foundation ✅
-Phase 2 – Backend Skeleton
+Phase 1: Project Foundation *
+Phase 2 – Backend Skeleton *
 Phase 3 – Document Upload
 Phase 4 – Document Intelligence
 Phase 5 – RAG Pipeline
