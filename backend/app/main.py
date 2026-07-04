@@ -1,15 +1,21 @@
 from fastapi import FastAPI
 
+from app.api.routes import upload
+
 app = FastAPI(
     title="Azure AI Document Intelligence Assistant",
-    description="A cloud-native Retrieval-Augmented Generation (RAG) platform for intelligent document understanding.",
     version="1.0.0"
 )
+
+app.include_router(
+    upload.router,
+    prefix="/documents",
+    tags=["Documents"]
+)
+
 
 @app.get("/")
 def root():
     return {
-        "project": "Azure AI Document Intelligence Assistant",
-        "status": "Running",
-        "version": "1.0.0"
+        "status": "Running"
     }
