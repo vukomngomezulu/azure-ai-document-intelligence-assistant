@@ -1,9 +1,8 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 
-from app.services.storage_service import save_file
+from app.services.storage_service import upload_file
 
 router = APIRouter()
-
 
 ALLOWED_EXTENSIONS = [
     ".pdf",
@@ -13,9 +12,7 @@ ALLOWED_EXTENSIONS = [
 
 
 @router.post("/upload")
-async def upload_document(
-    file: UploadFile = File(...)
-):
+async def upload_document(file: UploadFile = File(...)):
 
     extension = "." + file.filename.split(".")[-1].lower()
 
@@ -25,10 +22,10 @@ async def upload_document(
             detail="Unsupported file type."
         )
 
-    filepath = save_file(file)
+    blob_url = upload_file(file)
 
     return {
         "message": "Upload successful",
         "filename": file.filename,
-        "path": str(filepath)
+        "blob_url": blob_url
     }

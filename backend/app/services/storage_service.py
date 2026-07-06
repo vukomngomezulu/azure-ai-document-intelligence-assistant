@@ -1,16 +1,21 @@
-from pathlib import Path
-import shutil
+from azure.storage.blob import BlobServiceClient
+from app.config.settings import settings
 
-UPLOAD_FOLDER = Path("uploads")
+blob_service = BlobServiceClient.from_connection_string(
+    settings.STORAGE_CONNECTION
+)
 
-UPLOAD_FOLDER.mkdir(exist_ok=True)
+container_client = blob_service.get_container_client(
+    settings.STORAGE_CONTAINER
+)
 
+def upload_file(file):
 
-def save_file(file):
+    blob_client = container_client.get_blob_client(file.filename)
 
-    destination = UPLOAD_FOLDER / file.filename
+    blob_client.upload_blob(
+        file.file,
+        overwrite=True
+    )
 
-    with destination.open("wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
-
-    return destination
+    return blob_client.url

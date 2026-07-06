@@ -4,7 +4,7 @@ import os
 load_dotenv()
 
 class Settings:
-    PROJECT_NAME = "Azure AI Document Intelligence Assistant"
-    VERSION = "1.0.0"
+    STORAGE_CONNECTION = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+    STORAGE_CONTAINER = os.getenv("AZURE_STORAGE_CONTAINER")
 
 settings = Settings()
