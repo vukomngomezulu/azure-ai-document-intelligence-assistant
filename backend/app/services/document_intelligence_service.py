@@ -27,3 +27,20 @@ def extract_document(path: str):
         result = poller.result()
 
     return result
+
+
+def get_document_text(result):
+    """
+    Extract all text from the Document Intelligence result.
+    """
+
+    if hasattr(result, "content") and result.content:
+        return result.content
+
+    text = ""
+
+    if hasattr(result, "paragraphs") and result.paragraphs:
+        for paragraph in result.paragraphs:
+            text += paragraph.content + "\n"
+
+    return text.strip()
