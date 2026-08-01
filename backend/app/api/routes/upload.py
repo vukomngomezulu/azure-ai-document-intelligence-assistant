@@ -3,7 +3,11 @@ from pathlib import Path
 from app.config.settings import settings
 from fastapi import APIRouter, UploadFile, File, HTTPException
 
-from app.services.storage_service import save_file
+from app.services.storage_service import (
+    upload_to_blob,
+    download_blob,
+    delete_temp_file,
+)
 from app.services.document_intelligence_service import (
     extract_document,
     get_document_text,
@@ -36,7 +40,10 @@ async def upload_document(file: UploadFile = File(...)):
         )
 
     # Save uploaded file
-    filepath = save_file(file)
+    upload_to_blob(file)
+
+    filepath = download_blob(file.filename)
+    
 
     # Extract text using Azure AI Document Intelligence
     result = extract_document(str(filepath))
@@ -62,6 +69,9 @@ async def upload_document(file: UploadFile = File(...)):
         filename=file.filename,
         embeddings=embeddings
     )
+
+    delete_temp_file(filepath)
+
     return {
     "message": "Document indexed successfully",
     "filename": file.filename,
