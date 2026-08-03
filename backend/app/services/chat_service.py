@@ -10,9 +10,9 @@ client = AzureOpenAI(
 )
 
 
-def generate_answer(question: str, chunks):
+def generate_answer(question: str, chunks, history):
     """
-    Generate an answer using GPT-5.5 and the retrieved document chunks.
+    Generate an answer using GPT-5.5 with conversation history.
     """
 
     context = "\n\n".join(
@@ -22,19 +22,26 @@ def generate_answer(question: str, chunks):
         ]
     )
 
-    system_prompt = """
-You are an AI document assistant.
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "You are an AI document assistant.\n"
+                "Answer ONLY using the supplied document context.\n"
+                "If the answer is not present, reply:\n"
+                "\"I couldn't find that information in the uploaded documents.\""
+            )
+        }
+    ]
 
-Answer ONLY using the information provided in the context.
+    # Previous conversation
+    messages.extend(history)
 
-If the answer cannot be found in the context, reply:
-
-"I couldn't find that information in the uploaded documents."
-
-Do not make up information.
-"""
-
-    user_prompt = f"""
+    # Current question
+    messages.append(
+        {
+            "role": "user",
+            "content": f"""
 Context:
 
 {context}
@@ -43,20 +50,12 @@ Question:
 
 {question}
 """
+        }
+    )
 
     response = client.chat.completions.create(
         model=settings.OPENAI_CHAT_DEPLOYMENT,
-        messages=[
-            {
-                "role": "system",
-                "content": system_prompt
-            },
-            {
-                "role": "user",
-                "content": user_prompt
-            }
-        ],
-       
+        messages=messages
     )
 
     return response.choices[0].message.content
