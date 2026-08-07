@@ -1,37 +1,20 @@
-from pathlib import Path
-
-from app.config.settings import settings
 from fastapi import APIRouter, UploadFile, File, HTTPException
 
-from app.services.storage_service import (
-    upload_to_blob,
-    download_blob,
-    delete_temp_file,
-)
-from app.services.document_intelligence_service import (
-    extract_document,
-    get_document_text,
-)
+from app.services.storage_service import save_file
+from app.services.local_document_service import extract_text
 from app.services.chunking_service import chunk_text
 from app.services.embedding_service import generate_embeddings
+from app.services.chroma_service import add_chunks
 
 router = APIRouter()
 
-ALLOWED_EXTENSIONS = [
-    ".pdf",
-    ".docx",
-    ".txt",
-]
+ALLOWED_EXTENSIONS = [".txt"]
 
 
-@router.post("/upload")
+@router.post("/")
 async def upload_document(file: UploadFile = File(...)):
-    """
-    Upload a document, extract its text,
-    split it into chunks and generate embeddings.
-    """
 
-    extension = Path(file.filename).suffix.lower()
+    extension = "." + file.filename.split(".")[-1].lower()
 
     if extension not in ALLOWED_EXTENSIONS:
         raise HTTPException(
@@ -39,44 +22,37 @@ async def upload_document(file: UploadFile = File(...)):
             detail="Unsupported file type."
         )
 
-    # Save uploaded file
-    upload_to_blob(file)
+    # Save locally
+    file_path = save_file(file)
 
-    filepath = download_blob(file.filename)
-    
-
-    # Extract text using Azure AI Document Intelligence
-    result = extract_document(str(filepath))
-
-    # Get plain text
-    document_text = get_document_text(result)
-
-    # Split into chunks
-    chunks = chunk_text(document_text)
+    # Extract text locally
+    text = extract_text(file_path)
+    # Chunk text
+    chunks = chunk_text(text)
 
     if not chunks:
         raise HTTPException(
             status_code=400,
-            detail="No text could be extracted from the document."
+            detail="No text found in document."
         )
 
     # Generate embeddings
     embeddings = generate_embeddings(chunks)
 
-    from app.services.search_service import upload_documents
+    # Prepare chunks for ChromaDB
+    chunk_data = []
 
-    upload_documents(
-        filename=file.filename,
-        embeddings=embeddings
-    )
+    for i, chunk in enumerate(chunks):
+        chunk_data.append({
+            "chunk": chunk,
+            "filename": file.filename,
+            "chunk_number": i
+        })
 
-    delete_temp_file(filepath)
+    # Store in ChromaDB
+    add_chunks(chunk_data, embeddings)
 
     return {
-    "message": "Document indexed successfully",
-    "filename": file.filename,
-    "pages": len(result.pages),
-    "chunks_created": len(chunks),
-    "embeddings_created": len(embeddings),
-    "vector_database": settings.SEARCH_INDEX
-}
+        "message": "Document indexed successfully",
+        "chunks": len(chunk_data)
+    }

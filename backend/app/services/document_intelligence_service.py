@@ -1,46 +1,22 @@
-from azure.core.credentials import AzureKeyCredential
-from azure.ai.documentintelligence import DocumentIntelligenceClient
-
-from app.config.settings import settings
-
-
-client = DocumentIntelligenceClient(
-    endpoint=settings.DOCUMENT_INTELLIGENCE_ENDPOINT,
-    credential=AzureKeyCredential(
-        settings.DOCUMENT_INTELLIGENCE_KEY
-    )
-)
+import os
 
 
 def extract_document(path: str):
     """
-    Extract text and layout information from a document.
+    Local document extractor.
+    Currently supports .txt files.
     """
 
-    with open(path, "rb") as document:
+    extension = os.path.splitext(path)[1].lower()
 
-        poller = client.begin_analyze_document(
-            "prebuilt-layout",
-            body=document
-        )
+    if extension == ".txt":
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read()
 
-        result = poller.result()
-
-    return result
+    raise Exception(
+        f"{extension} files are not supported yet."
+    )
 
 
 def get_document_text(result):
-    """
-    Extract all text from the Document Intelligence result.
-    """
-
-    if hasattr(result, "content") and result.content:
-        return result.content
-
-    text = ""
-
-    if hasattr(result, "paragraphs") and result.paragraphs:
-        for paragraph in result.paragraphs:
-            text += paragraph.content + "\n"
-
-    return text.strip()
+    return result

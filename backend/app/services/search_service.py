@@ -48,6 +48,13 @@ def create_index():
             key=True
         ),
 
+        SimpleField(
+    name="chunk_number",
+    type=SearchFieldDataType.Int32,
+    filterable=True,
+    sortable=True
+),
+
         SearchableField(
             name="filename",
             type=SearchFieldDataType.String
@@ -108,20 +115,17 @@ def upload_documents(filename, embeddings):
 
     documents = []
 
-    for item in embeddings:
+    for index, item in enumerate(embeddings):
 
-        documents.append({
-
-            "id": str(uuid.uuid4()),
-
-            "filename": filename,
-
-            "chunk": item["text"],
-
-            "embedding": item["embedding"]
-
-        })
-
+        documents.append(
+    {
+        "id": f"{filename}-{index}",
+        "filename": filename,
+        "chunk": chunk,
+        "chunk_number": index,
+        "embedding": embedding
+    }
+)
     result = search_client.upload_documents(documents)
 
     return result
